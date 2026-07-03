@@ -164,5 +164,5 @@ Layout adapta-se automaticamente para:
 ## 📚 Referências
 
 - [PADRONIZACAO.md](./PADRONIZACAO.md) - Guia de padrões de código
-- [README.md](./README.md) - Documentação de uso
-- [style.css](./public/assets/css/style.css) - Documentação de tokens
+- [README.md](../README.md) - Documentação de uso
+- [style.css](../public/assets/css/style.css) - Documentação de tokens

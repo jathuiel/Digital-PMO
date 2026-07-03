@@ -37,6 +37,10 @@ export DB_PASS=sua_senha
 ```
 
 ### 3. Inicie o Servidor PHP
+
+**Windows:** dê duplo clique em `iniciar-servidor.bat` (ou rode `.\iniciar-servidor.bat` no terminal). Ele já sobe o servidor em `http://127.0.0.1:8000` a partir da pasta do projeto.
+
+**Manual (qualquer SO):**
 ```bash
 php -S localhost:8000
 ```
@@ -52,20 +56,32 @@ http://localhost:8000
 PMO 2/
 ├── index.html                 # Interface frontend
 ├── api.php                    # Backend API
+├── iniciar-servidor.bat       # Sobe o servidor PHP (Windows)
 ├── config/
 │   └── database.php          # Configuração de banco
+├── database/
+│   ├── schema.sql            # Estrutura das tabelas
+│   └── seed.sql              # Dados de exemplo
 ├── public/
-│   └── assets/css/
-│       └── style.css         # Estilos unificados
-├── README.md                 # Este arquivo
-├── ESTRUTURA.md              # Documentação técnica
-└── PADRONIZACAO.md           # Guia de padrões
+│   └── assets/
+│       ├── css/style.css     # Estilos unificados
+│       └── js/app.js         # Lógica de frontend
+├── docs/                      # Documentação complementar
+│   ├── ESTRUTURA.md
+│   ├── PADRONIZACAO.md
+│   ├── MELHORIAS.md
+│   ├── REFERENCIA-RAPIDA.md
+│   └── arquitetura-do-projeto.md
+└── README.md                 # Este arquivo
 ```
 
 ## 📚 Documentação
 
-- **[ESTRUTURA.md](./ESTRUTURA.md)** - Estrutura técnica do projeto
-- **[PADRONIZACAO.md](./PADRONIZACAO.md)** - Padrões de código e convenções
+- **[docs/ESTRUTURA.md](./docs/ESTRUTURA.md)** - Estrutura técnica do projeto
+- **[docs/PADRONIZACAO.md](./docs/PADRONIZACAO.md)** - Padrões de código e convenções
+- **[docs/MELHORIAS.md](./docs/MELHORIAS.md)** - Melhorias propostas
+- **[docs/REFERENCIA-RAPIDA.md](./docs/REFERENCIA-RAPIDA.md)** - Referência rápida
+- **[docs/arquitetura-do-projeto.md](./docs/arquitetura-do-projeto.md)** - Arquitetura do projeto
 - **[style.css](./public/assets/css/style.css)** - Tokens de design e componentes
 
 ## 🎯 Funcionalidades
@@ -224,8 +240,8 @@ Variáveis CSS definidas em `style.css` para manter consistência:
 ## 📞 Suporte
 
 Para problemas ou dúvidas:
-1. Consulte [ESTRUTURA.md](./ESTRUTURA.md)
-2. Verifique [PADRONIZACAO.md](./PADRONIZACAO.md)
+1. Consulte [docs/ESTRUTURA.md](./docs/ESTRUTURA.md)
+2. Verifique [docs/PADRONIZACAO.md](./docs/PADRONIZACAO.md)
 3. Revise os comentários no código
 
 ## 📄 Licença
