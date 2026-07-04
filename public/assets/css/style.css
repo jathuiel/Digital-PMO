@@ -13,20 +13,23 @@
 /* ===== DESIGN TOKENS ===== */
 
 :root {
-  /* ===== Cores - Paleta primária ===== */
-  --color-primary: #f6763b;
-  --color-primary-dark: #d8581d;
-  --color-primary-bg: #575757;
+/* ===== Cores - Paleta primária ===== */
+--color-primary: #f6763b;          /* Destaques e ações */
+--color-primary-dark: #d8581d;     /* Hover/ativo */
+--color-primary-bg: #575757;       /* Fundo de destaque */
+--color-secondary-bg: #f6f6f6;     /* Fundo claro */
 
-  /* ===== Cores - Backgrounds ===== */
-  --color-bg: #292929;
-  --color-surface: #575757;
-  --color-border: #d8581d;
+/* ===== Backgrounds ===== */
+--color-bg-primary: #292929;       /* Fundo principal */
+--color-bg-secondary: #575757;     /* Cards/Menu */
+--color-bg-tertiary: #f6f6f6;      /* Fundo terciário */
+--color-border: #d8581d;           /* Bordas */
 
-  /* ===== Cores - Texto ===== */
-  --color-text-dark: #292929;
-  --color-text-light: #f6f6f6;
-  --color-text-muted: #d4d4d4;
+/* ===== Texto ===== */
+--color-text-dark: #292929;        /* Sobre fundos claros */
+--color-text-secondary: #d8581d;   /* Texto de destaque */
+--color-text-light: #f6f6f6;       /* Sobre fundos escuros */
+--color-text-muted: #d4d4d4;       /* Texto secundário */
 
   /* ===== Cores - Status ===== */
   --color-green: #16a34a;
@@ -39,7 +42,7 @@
   --color-gray-bg: #f1f5f9;
 
   /* ===== Tipografia - Famílias ===== */
-  --font-sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-sans: -apple-system, "Segoe UI Semibold", Roboto, Helvetica, Arial, sans-serif;
 
   /* ===== Tipografia - Escala ===== */
   --text-sm: 0.875rem;      /* 14px */
@@ -55,7 +58,7 @@
   --space-5: 32px;
 
   /* ===== Componentes ===== */
-  --radius: 8px;
+  --radius: 10px;
   --shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
   --sidebar-width: 220px;
 
@@ -80,8 +83,8 @@ body {
   padding: 0;
   font-family: var(--font-sans);
   font-size: var(--text-base);
-  color: var(--color-text);
-  background: var(--color-bg);
+  color: var(--color-text-secondary);
+  background: var(--color-bg-primary);
   line-height: 1.5;
 }
 
@@ -97,7 +100,7 @@ body {
 .sidebar {
   width: var(--sidebar-width);
   flex-shrink: 0;
-  background: var(--color-surface);
+  background: var(--color-bg-secondary);
   border-right: 1px solid var(--color-border);
   padding: var(--space-4) var(--space-3);
   overflow-y: auto;
@@ -187,8 +190,8 @@ body {
 table {
   width: 100%;
   border-collapse: collapse;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  background: var(--color-bg-tertiary);
+  border: 2px solid var(--color-border);
   border-radius: var(--radius);
   overflow: hidden;
   box-shadow: var(--shadow);
@@ -205,7 +208,7 @@ td {
 
 th {
   background: var(--color-gray-bg);
-  color: var(--color-text-muted);
+  color: var(--color-text-dark);
   font-weight: 600;
   text-transform: uppercase;
   font-size: 0.75rem;
@@ -217,7 +220,7 @@ tr:last-child td {
 }
 
 tbody tr:hover {
-  background: var(--color-bg);
+  background: var(--color-secondary-bg);
 }
 
 /* ===== CARDS & DASHBOARD ===== */
@@ -232,13 +235,14 @@ tbody tr:hover {
 }
 
 .card {
-  background: var(--color-surface);
+  background: var(--color-bg-secondary);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: var(--space-3);
   text-align: center;
-  transition: all 0.2s ease;
+  transition: all 0.9s ease;
+  animation: effect1 0.8s ease-in-out;
 }
 
 .card:hover {
@@ -261,13 +265,97 @@ tbody tr:hover {
   letter-spacing: 0.5px;
 }
 
+/* ===== DASHBOARD - GRAFICOS ===== */
+
+@keyframes effect1 {
+  0% { transform: translateY(10px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  transition: all 0.9s ease;
+}
+
+.chart-panel {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: var(--space-3);
+  animation: effect1 0.8s ease-in-out;
+
+}
+
+.chart-panel h3 {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-text-light);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  animation: alternate 0.5s ease-in-out;
+}
+
+.chart-vazio {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  margin: 0;
+}
+
+.bar-row {
+  display: grid;
+  grid-template-columns: minmax(90px, 35%) 1fr auto;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.bar-label {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bar-track {
+  background: var(--color-bg-primary);
+  border-radius: var(--radius);
+  overflow: hidden;
+  height: 18px;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: var(--radius);
+  transition: width 0.5s ease;
+}
+
+.bar-valor {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-light);
+  min-width: 1.5em;
+  text-align: right;
+}
+
+@media (max-width: 480px) {
+  .bar-row {
+    grid-template-columns: minmax(70px, 40%) 1fr auto;
+  }
+}
+
 /* ===== FORMULARIOS ===== */
 
 .form-cadastro {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: var(--space-3);
-  background: var(--color-surface);
+  background: var(--color-bg-tertiary);
   
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
@@ -281,7 +369,7 @@ tbody tr:hover {
   flex-direction: column;
   gap: var(--space-1);
   font-size: var(--text-sm);
-  color: var(--color-text-muted);
+  color: var(--color-text-dark);
   font-weight: 500;
 }
 
@@ -293,8 +381,8 @@ tbody tr:hover {
   padding: var(--space-2);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  color: var(--color-text);
-  background: var(--color-surface);
+  color: var(--color-text-dark);
+  background: var(--color-bg-tertiary);
   transition: border-color 0.2s ease;
 }
 
@@ -321,7 +409,8 @@ tbody tr:hover {
   font-size: var(--text-sm);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.5s  ease;
+  box-shadow: 0 3px 6px rgba(56, 56, 56, 0.3);  
 }
 
 .form-cadastro button:hover {
@@ -363,7 +452,7 @@ tbody tr:hover {
 
 .kanban-coluna {
   min-width: 250px;
-  background: var(--color-surface);
+  background: var(--color-bg-secondary);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   padding: var(--space-2);
@@ -503,6 +592,7 @@ tbody tr:hover {
 
   .cards {
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    
   }
 
   .form-cadastro {

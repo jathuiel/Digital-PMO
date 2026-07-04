@@ -38,34 +38,166 @@ const PMO = (() => {
         modulos[slugAtivo].render();
     }
 
-    /* ===== REQUISICOES API ===== */
+    /* ===== "BANCO" LOCAL (localStorage) =====
+       ponytail: sem servidor, dados ficam só neste navegador. Se precisar de
+       banco compartilhado entre usuários, volte para api.php + MySQL. */
+    const CHAVE_BANCO = 'pmo_banco';
+
+    function bancoPadrao() {
+        return {
+            proximoId: { projeto: 2, sprint: 3, tarefa: 8 },
+            projetos: [
+                { ID: 1, Nome: 'Expansão Planta Industrial', Cliente: 'Cliente Alfa', Status: 'Em Andamento', Inicio: '2026-01-05' }
+            ],
+            sprints: [
+                { ID: 1, Nome: 'Sprint 1', Objetivo: 'Levantamento e projeto elétrico', DataInicio: '2026-07-01', DataFim: '2026-07-14', Status: 'Concluído' },
+                { ID: 2, Nome: 'Sprint 2', Objetivo: 'Projeto mecânico e revisão', DataInicio: '2026-07-15', DataFim: '2026-07-28', Status: 'Em Andamento' }
+            ],
+            tarefas: [
+                { ID: 1, Titulo: 'Levantar cargas elétricas', Descricao: 'Mapear consumo dos motores', Tipo: 'Tarefa', Prioridade: 'Alta', Responsavel: 'Bruno Lima', Status: 'Concluído', DataInicio: '2026-07-01', DataFim: '2026-07-05', StoryPoints: 5, Horas: 16 },
+                { ID: 2, Titulo: 'Revisar diagrama unifilar', Descricao: 'Atualizar diagrama com novas cargas', Tipo: 'Tarefa', Prioridade: 'Média', Responsavel: 'Bruno Lima', Status: 'Em Revisão', DataInicio: '2026-07-06', DataFim: '2026-07-10', StoryPoints: 3, Horas: 8 },
+                { ID: 3, Titulo: 'Dimensionar esteira', Descricao: 'Calcular capacidade e motor', Tipo: 'Tarefa', Prioridade: 'Alta', Responsavel: 'Fernanda Alves', Status: 'Em Desenvolvimento', DataInicio: '2026-07-15', DataFim: '2026-07-22', StoryPoints: 8, Horas: 24 },
+                { ID: 4, Titulo: 'Especificar rolamentos', Descricao: 'Selecionar componentes mecânicos', Tipo: 'Tarefa', Prioridade: 'Baixa', Responsavel: 'Fernanda Alves', Status: 'Pronto Sprint', DataInicio: '2026-07-20', DataFim: '2026-07-24', StoryPoints: 2, Horas: 6 },
+                { ID: 5, Titulo: 'Validar fornecedor de painel', Descricao: 'Cotação e homologação', Tipo: 'Tarefa', Prioridade: 'Média', Responsavel: 'Bruno Lima', Status: 'Refinamento', DataInicio: null, DataFim: null, StoryPoints: 3, Horas: 10 },
+                { ID: 6, Titulo: 'Testar protótipo de esteira', Descricao: 'Ensaio em bancada', Tipo: 'Tarefa', Prioridade: 'Alta', Responsavel: 'Fernanda Alves', Status: 'Backlog', DataInicio: null, DataFim: null, StoryPoints: 5, Horas: 20 },
+                { ID: 7, Titulo: 'Ideia: sensor de vibração', Descricao: 'Avaliar viabilidade', Tipo: 'Ideia', Prioridade: 'Baixa', Responsavel: 'Carlos Mendes', Status: 'Novo', DataInicio: null, DataFim: null, StoryPoints: 1, Horas: 4 }
+            ]
+        };
+    }
+
+    function carregarBanco() {
+        const salvo = localStorage.getItem(CHAVE_BANCO);
+        if (salvo) return JSON.parse(salvo);
+        const banco = bancoPadrao();
+        salvarBanco(banco);
+        return banco;
+    }
+
+    function salvarBanco(banco) {
+        localStorage.setItem(CHAVE_BANCO, JSON.stringify(banco));
+    }
+
+    function contarAgrupado(lista, chave, rotuloVazio) {
+        const grupos = {};
+        lista.forEach(item => {
+            const rotulo = item[chave] || rotuloVazio;
+            grupos[rotulo] = (grupos[rotulo] || 0) + 1;
+        });
+        return Object.entries(grupos)
+            .map(([label, total]) => ({ label, total }))
+            .sort((a, b) => b.total - a.total);
+    }
+
+    const TABELAS = { projeto: 'projetos', sprint: 'sprints', tarefa: 'tarefas' };
 
     /**
-     * Faz requisição para a API backend
+     * Simula a API backend usando localStorage (sem servidor/PHP necessário)
      *
      * @param {string} endpoint - ação desejada (dashboard, projetos, etc)
-     * @param {string} metodo - GET ou POST
-     * @param {object} dados - dados para enviar (se POST)
-     * @returns {Promise<object>} resposta JSON da API
+     * @param {string} metodo - GET ou POST (mantido por compatibilidade)
+     * @param {object} dados - dados da operação (inserir/atualizar/excluir)
+     * @returns {Promise<object>} resposta no mesmo formato da antiga api.php
      */
     async function api(endpoint, metodo = 'GET', dados = null) {
-        const opcoes = {
-            method: metodo,
-            headers: { 'Content-Type': 'application/json' }
-        };
+        const banco = carregarBanco();
 
-        if (dados) {
-            opcoes.body = JSON.stringify(dados);
-        }
+        switch (endpoint) {
+            case 'dashboard':
+                return {
+                    totalProjetos: banco.projetos.length,
+                    totalTarefas: banco.tarefas.length,
+                    totalSprints: banco.sprints.length,
+                    porStatus: contarAgrupado(banco.tarefas, 'Status', 'Sem status'),
+                    porPrioridade: contarAgrupado(banco.tarefas, 'Prioridade', 'Sem prioridade'),
+                    porResponsavel: contarAgrupado(banco.tarefas, 'Responsavel', 'Sem responsável'),
+                    porSprint: [{ label: 'Sem sprint', total: banco.tarefas.length }],
+                    porEntregavel: [{ label: 'Sem entregável', total: banco.tarefas.length }]
+                };
 
-        try {
-            const resposta = await fetch(`api.php?a=${endpoint}`, opcoes);
-            if (!resposta.ok) throw new Error(`Erro HTTP: ${resposta.status}`);
-            return resposta.json();
-        } catch (erro) {
-            mostrarErro('Erro ao conectar com servidor: ' + erro.message);
-            return { erro: erro.message };
+            case 'projetos':
+                return { projetos: [...banco.projetos].sort((a, b) => b.ID - a.ID) };
+
+            case 'sprints':
+                return { sprints: [...banco.sprints].sort((a, b) => b.ID - a.ID) };
+
+            case 'tarefas':
+                return { tarefas: [...banco.tarefas].sort((a, b) => b.ID - a.ID).slice(0, 100) };
+
+            case 'inserir': {
+                const tipo = dados.tipo;
+                const tabela = TABELAS[tipo];
+                if (!tabela) return { sucesso: false, erro: 'Tipo de inserção inválido' };
+
+                const registro = montarRegistro(tipo, dados);
+                if (registro.erro) return { sucesso: false, erro: registro.erro };
+
+                registro.ID = banco.proximoId[tipo]++;
+                banco[tabela].push(registro);
+                salvarBanco(banco);
+                return { sucesso: true };
+            }
+
+            case 'atualizar': {
+                if (!dados.id) return { sucesso: false, erro: 'ID é obrigatório' };
+                const tipo = dados.tipo;
+                const tabela = TABELAS[tipo];
+                if (!tabela) return { sucesso: false, erro: 'Tipo de atualização inválido' };
+
+                const registro = montarRegistro(tipo, dados);
+                if (registro.erro) return { sucesso: false, erro: registro.erro };
+
+                const indice = banco[tabela].findIndex(r => r.ID == dados.id);
+                if (indice === -1) return { sucesso: false, erro: 'Registro não encontrado' };
+
+                registro.ID = banco[tabela][indice].ID;
+                banco[tabela][indice] = registro;
+                salvarBanco(banco);
+                return { sucesso: true };
+            }
+
+            case 'excluir': {
+                if (!dados.id) return { sucesso: false, erro: 'ID é obrigatório' };
+                const tabela = TABELAS[dados.tipo];
+                if (!tabela) return { sucesso: false, erro: 'Tipo de exclusão inválido' };
+
+                banco[tabela] = banco[tabela].filter(r => r.ID != dados.id);
+                salvarBanco(banco);
+                return { sucesso: true };
+            }
+
+            default:
+                return { erro: 'Ação não encontrada' };
         }
+    }
+
+    /**
+     * Valida e monta o registro de projeto/sprint/tarefa a partir do payload do formulário
+     */
+    function montarRegistro(tipo, dados) {
+        if (tipo === 'projeto') {
+            if (!dados.nome || !dados.cliente) return { erro: 'Nome e cliente são obrigatórios' };
+            return { Nome: dados.nome.trim(), Cliente: dados.cliente.trim(), Status: dados.status || 'Ativo', Inicio: new Date().toISOString().slice(0, 10) };
+        }
+        if (tipo === 'sprint') {
+            if (!dados.nome || !dados.inicio || !dados.fim) return { erro: 'Nome, início e fim são obrigatórios' };
+            return { Nome: dados.nome.trim(), Objetivo: (dados.objetivo || '').trim(), DataInicio: dados.inicio, DataFim: dados.fim, Status: dados.status || 'Ativa' };
+        }
+        if (tipo === 'tarefa') {
+            if (!dados.titulo) return { erro: 'Título é obrigatório' };
+            return {
+                Titulo: dados.titulo.trim(),
+                Descricao: (dados.descricao || '').trim(),
+                Tipo: dados.tipoItem || 'Tarefa',
+                Prioridade: dados.prioridade || null,
+                Responsavel: (dados.responsavel || '').trim(),
+                Status: dados.status || 'Novo',
+                DataInicio: dados.dataInicio || null,
+                DataFim: dados.dataFim || null,
+                StoryPoints: dados.storyPoints || null,
+                Horas: dados.horas || null
+            };
+        }
+        return { erro: 'Tipo inválido' };
     }
 
     /* ===== RENDERIZADORES ===== */
@@ -95,7 +227,42 @@ const PMO = (() => {
                     <div class="card-label">Sprints</div>
                 </li>
             </ul>
+            <div class="dashboard-grid">
+                ${renderBarChart('Tarefas por Entregável', dados.porEntregavel)}
+                ${renderBarChart('Tarefas por Responsável', dados.porResponsavel)}
+                ${renderBarChart('Tarefas por Sprint', dados.porSprint)}
+                ${renderBarChart('Tarefas por Status', dados.porStatus)}
+                ${renderBarChart('Tarefas por Prioridade', dados.porPrioridade)}
+            </div>
         `;
+    }
+
+    /**
+     * Monta um gráfico de barras horizontais em CSS puro a partir de [{label, total}]
+     */
+    function renderBarChart(titulo, itens) {
+        if (!itens || itens.length === 0) {
+            return `<div class="chart-panel"><h3>${titulo}</h3><p class="chart-vazio">Sem dados</p></div>`;
+        }
+
+        const maximo = Math.max(...itens.map(i => i.total));
+        const cores = ['#2a78d6', '#1baf7a', '#eda100', '#008300', '#4a3aa7', '#e34948', '#e87ba4', '#eb6834'];
+
+        const linhas = itens.map((item, i) => {
+            const largura = maximo > 0 ? Math.round((item.total / maximo) * 100) : 0;
+            const cor = cores[i % cores.length];
+            return `
+                <div class="bar-row">
+                    <span class="bar-label" title="${escaparHtml(item.label)}">${escaparHtml(item.label)}</span>
+                    <div class="bar-track">
+                        <div class="bar-fill" style="width:${largura}%;background:${cor}"></div>
+                    </div>
+                    <span class="bar-valor">${item.total}</span>
+                </div>
+            `;
+        }).join('');
+
+        return `<div class="chart-panel"><h3>${titulo}</h3>${linhas}</div>`;
     }
 
     /**
